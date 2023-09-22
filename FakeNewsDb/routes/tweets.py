@@ -1,11 +1,15 @@
-from fastapi import APIRouter, status, Response
+from fastapi import APIRouter, HTTPException, status, Response
 from models.tweet import Tweet
 from config.db import conn
+from config.twitter import client, api
+from config.openai import openai
 from schemas.tweet import serializeDict, tweetsEntity, serializeList, tweetEntity
 from bson import ObjectId
 from starlette.status import HTTP_204_NO_CONTENT
-from config.twitter import client, api
+
 import pandas as pd
+import json
+import requests
 import json
 
 router = APIRouter()
@@ -145,27 +149,61 @@ async def get_tweets_user_screenname(screen_name: str,numero_resultados: int):
             #json_data = json.dumps(data)
         conn.local.tweet.insert_many(data)
         #tweetid.extend(result.inserted_ids)
-   
+   #git flow despliegue con jenkeys para liberty
         
         
         return 'Hecho'
     except Exception as e:
         menssage=str({'error':e, 'Data':data})
         return menssage
-    
-
-
-
-    
-
-
-
+ 
 @router.post('/tweets', response_model=Tweet, tags=["tweets"])
 async def create_tweet(tweet: Tweet):
     result = conn.local.tweet.insert_one(dict(tweet))
     tweet_id = result.inserted_id 
     return serializeDict(conn.local.tweet.find_one({"_id":tweet_id}))
 
+#metodos de notificaciones para las noticias metodos manueles con la api 
+@router.post('/send_sms_manual/{numero}', tags=["tweets"])
+async def create_tweet(phone_number: str, message: str):
+    url = 'https://2myuqf82ki.execute-api.us-east-1.amazonaws.com/default/sms'
+    data = {
+        'phone_number': phone_number,
+        'answer': message
+    }
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    response = requests.post(url, data=json.dumps(data), headers=headers)
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=400, detail="SMS sending failed")
+
+    return {"status_code": response.status_code, "response": response.text}
+    
+    
+#Metodo de notificación por medio de la api de gmail, metodo manual
+@router.post('/send_mail_manual/{numero}', tags=["tweets"])
+async def create_tweet(phone_number: str, message: str):
+    url = 'https://2myuqf82ki.execute-api.us-east-1.amazonaws.com/default/sms'
+    data = {
+        'phone_number': phone_number,
+        'answer': message
+    }
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    response = requests.post(url, data=json.dumps(data), headers=headers)
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=400, detail="SMS sending failed")
+
+    return {"status_code": response.status_code, "response": response.text}
+
+
+     
 
 
 @router.put("/tweets/{id}", response_model=Tweet, tags=["tweets"])
@@ -175,6 +213,15 @@ async def update_tweet(id: str, tweet: Tweet):
     })
     return serializeDict(conn.local.tweet.find_one({"_id":ObjectId(id)}))
 
+@router.put("/tweets/{id}/veracidad",response_model=Tweet, tags=["tweets"])
+async def update_tweet_veracidad(id: str, veracidad: str):
+    response = conn.local.tweet.find_one_and_update({"_id":ObjectId(id)},{
+        "$set":{"verasidad": veracidad}
+    })
+    response = conn.local.tweet.find_one({"_id":ObjectId(id)})
+    return serializeDict(response)
+
+
 @router.delete("/tweets/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["tweets"])
 async def delete_tweet(id: str):
      conn.local.tweet.find_one_and_delete({
@@ -183,3 +230,33 @@ async def delete_tweet(id: str):
      return Response(status_code=HTTP_204_NO_CONTENT)
 
 
+@router.post("/verificar_noticia_openai/{noticia}",tags=["tweets"])
+async def verificar_noticia(noticia: str):
+
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {
+                "role": "system",
+                "content": "Eres un sistema de verficacion de informacion, lees una nota y determinas aproximadamente si la informacion es verdad o falsa, si es verdad respondes V y si es falsa F"
+            },
+            {
+            "role": "user",
+            "content": "Noticia: @petrogustavo pagándole a delincuentes de nuestro bolsillo,  Mejor le hubiera bajado al gasto públicos de congresistas , concejales , diputados "
+            },
+            {
+            "role": "assistant",
+            "content": "F | p=0.95"
+            },
+            {
+                "role": "user",
+                "content": noticia
+            }
+        ],
+        temperature=1,
+        max_tokens=10,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+    return {"respuesta": response.choices[0].message['content']}
