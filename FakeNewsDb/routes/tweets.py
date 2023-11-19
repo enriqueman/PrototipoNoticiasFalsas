@@ -14,12 +14,12 @@ import json
 
 router = APIRouter()
 
-@router.get('/tweets', response_model=list[Tweet], tags=["tweets"])
+@router.get('/tweets', response_model=list[Tweet], tags=["Tweets"])
 async def find_all_tweets():
     return tweetsEntity(conn.local.tweet.find())
 
 # corregir respuesta de peticion
-@router.get('/get_user_tweets_id/{id1,numero_resultados}', tags=["tweets"])
+@router.get('/get_user_tweets_id/{id1,numero_resultados}', tags=["Tweets"])
 async def get_tweets_id_user(id1: int,numero_resultados:int):
 
     try:
@@ -73,7 +73,7 @@ async def get_tweets_id_user(id1: int,numero_resultados:int):
     
 
 #optener tweets por scren name
-@router.get('/get_user_tweets_screenname/{screen_name,numero_resultados}', tags=["tweets"])
+@router.get('/get_user_tweets_screenname/{screen_name,numero_resultados}', tags=["Tweets"])
 async def get_tweets_user_screenname(screen_name: str,numero_resultados: int):
 
     existing_user = conn.local.usertweet.find_one({"Usuario": screen_name})
@@ -157,14 +157,14 @@ async def get_tweets_user_screenname(screen_name: str,numero_resultados: int):
         menssage=str({'error':e, 'Data':data})
         return menssage
  
-@router.post('/tweets', response_model=Tweet, tags=["tweets"])
+@router.post('/tweets', response_model=Tweet, tags=["Tweets"])
 async def create_tweet(tweet: Tweet):
     result = conn.local.tweet.insert_one(dict(tweet))
     tweet_id = result.inserted_id 
     return serializeDict(conn.local.tweet.find_one({"_id":tweet_id}))
 
 #metodos de notificaciones para las noticias metodos manueles con la api 
-@router.post('/send_sms_manual/{numero}', tags=["tweets"])
+@router.post('/send_sms_manual/{numero}', tags=["Tweets"])
 async def create_tweet(phone_number: str, message: str):
     url = 'https://2myuqf82ki.execute-api.us-east-1.amazonaws.com/default/sms'
     data = {
@@ -184,7 +184,7 @@ async def create_tweet(phone_number: str, message: str):
     
     
 #Metodo de notificación por medio de la api de gmail, metodo manual
-@router.post('/send_mail_manual/{numero}', tags=["tweets"])
+@router.post('/send_mail_manual/{numero}', tags=["Tweets"])
 async def create_tweet(phone_number: str, message: str):
     url = 'https://2myuqf82ki.execute-api.us-east-1.amazonaws.com/default/sms'
     data = {
@@ -206,14 +206,14 @@ async def create_tweet(phone_number: str, message: str):
      
 
 
-@router.put("/tweets/{id}", response_model=Tweet, tags=["tweets"])
+@router.put("/tweets/{id}", response_model=Tweet, tags=["Tweets"])
 async def update_tweet(id: str, tweet: Tweet):
     conn.local.tweet.find_one_and_update({"_id":ObjectId(id)},{
         "$set":dict(tweet)
     })
     return serializeDict(conn.local.tweet.find_one({"_id":ObjectId(id)}))
 
-@router.put("/tweets/{id}/veracidad",response_model=Tweet, tags=["tweets"])
+@router.put("/tweets/{id}/veracidad",response_model=Tweet, tags=["Tweets"])
 async def update_tweet_veracidad(id: str, veracidad: str):
     response = conn.local.tweet.find_one_and_update({"_id":ObjectId(id)},{
         "$set":{"verasidad": veracidad}
@@ -222,7 +222,7 @@ async def update_tweet_veracidad(id: str, veracidad: str):
     return serializeDict(response)
 
 
-@router.delete("/tweets/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["tweets"])
+@router.delete("/tweets/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Tweets"])
 async def delete_tweet(id: str):
      conn.local.tweet.find_one_and_delete({
         "_id": ObjectId(id)
@@ -230,7 +230,7 @@ async def delete_tweet(id: str):
      return Response(status_code=HTTP_204_NO_CONTENT)
 
 
-@router.post("/verificar_noticia_openai/{noticia}",tags=["tweets"])
+@router.post("/verificar_noticia_openai/{noticia}",tags=["Tweets"])
 async def verificar_noticia(noticia: str):
 
     response = openai.ChatCompletion.create(

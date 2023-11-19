@@ -10,24 +10,24 @@ import json
 
 usertweet = APIRouter()
 
-@usertweet.get('/usertweets', response_model=list[UserTweet], tags=["usertweets"])
+@usertweet.get('/usertweets', response_model=list[UserTweet], tags=["UserTweets"])
 async def find_all_usertweets():
     return userTweetsEntity(conn.local.usertweet.find())
 
-@usertweet.post('/usertweets', response_model=UserTweet, tags=["usertweets"])
+@usertweet.post('/usertweets', response_model=UserTweet, tags=["UserTweets"])
 async def create_usertweet(usertweet: UserTweet):
     result = conn.local.usertweet.insert_one(dict(usertweet))
     usertweet_id = result.inserted_id # obtenemos el id del documento insertado
     return serializeDict(conn.local.usertweet.find_one({"_id":usertweet_id}))
 
-@usertweet.put("/usertweets/{id}", response_model=UserTweet, tags=["usertweets"])
+@usertweet.put("/usertweets/{id}", response_model=UserTweet, tags=["UserTweets"])
 async def update_usertweet(id: str, usertweet: UserTweet):
     conn.local.usertweet.find_one_and_update({"_id":ObjectId(id)},{
         "$set":dict(usertweet)
     })
     return serializeDict(conn.local.usertweet.find_one({"_id":ObjectId(id)}))
 
-@usertweet.delete("/usertweets/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["usertweets"])
+@usertweet.delete("/usertweets/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["UserTweets"])
 async def delete_usertweet(id: str):
      conn.local.usertweet.find_one_and_delete({
         "_id": ObjectId(id)
@@ -36,7 +36,7 @@ async def delete_usertweet(id: str):
 
 
 
-@usertweet.post('/get_user_info/{screen_name}', response_model=UserTweet ,tags=["usertweets"])
+@usertweet.post('/get_user_info/{screen_name}', response_model=UserTweet ,tags=["UserTweets"])
 async def save_user(screen_name: str):
     usern= '@'+screen_name
     try:
@@ -65,7 +65,7 @@ async def save_user(screen_name: str):
 
 
 
-@usertweet.post("/read_excel/{sheet_name,column_name}", response_model=list[UserTweet],tags=["usertweets"])
+@usertweet.post("/read_excel/{sheet_name,column_name}", response_model=list[UserTweet],tags=["UserTweets"])
 async def read_excel(sheet_name: str, column_name: str, file: UploadFile = File(...)):
     try:
         # Lee el archivo de Excel en un DataFrame de pandas

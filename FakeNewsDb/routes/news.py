@@ -7,24 +7,24 @@ from starlette.status import HTTP_204_NO_CONTENT
 
 news = APIRouter()
 
-@news.get('/news', response_model=list[News], tags=["news"])
+@news.get('/news', response_model=list[News], tags=["News"])
 async def find_all_news():
     return newsEntityList(conn.local.news.find())
 
-@news.post('/news', response_model=News, tags=["news"])
+@news.post('/news', response_model=News, tags=["News"])
 async def create_news(news: News):
     result = conn.local.news.insert_one(dict(news))
     news_id = result.inserted_id # obtenemos el id del documento insertado
     return serializeDict(conn.local.news.find_one({"_id":news_id}))
 
-@news.put("/news/{id}", response_model=News, tags=["news"])
+@news.put("/news/{id}", response_model=News, tags=["News"])
 async def update_news(id: str, news: News):
     conn.local.news.find_one_and_update({"_id":ObjectId(id)},{
         "$set":dict(news)
     })
     return serializeDict(conn.local.news.find_one({"_id":ObjectId(id)}))
 
-@news.delete("/news/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["news"])
+@news.delete("/news/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["News"])
 async def delete_news(id: str):
      conn.local.news.find_one_and_delete({
         "_id": ObjectId(id)
