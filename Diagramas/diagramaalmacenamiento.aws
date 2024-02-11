@@ -1,0 +1,84 @@
+@startuml
+title Sistema de Almacenamiento de Base de Datos
+
+class Notificaciones {
+    -titulo: str
+    -texto: str
+    -fecha: str
+    -veracidad: str
+    -autor: str
+    -notificado: str
+}
+
+class News {
+    -id: str
+    -title: str
+    -body: str
+    -type: str
+    -source: str
+    -date: str
+    -link: str
+}
+
+class Tweet {
+    -id: str
+    -id_autor: str
+    -tweet_id: str
+    -text: str
+    -date_of_publication: str
+    -retweet_count: str
+    -reply_count: str
+    -like_count: str
+    -quote_count: str
+    -bookmark_count: str
+    -impression_count: str
+    -verasidad: str
+}
+
+class User {
+    -id: str
+    -name: str
+    -lastname: str
+    -phone: str
+    -email: str
+}
+
+class UserTweet {
+    -id: str
+    -Usuario: str
+    -id_user: str
+    -name: str
+    -location: str
+    -description: str
+    -entities: str
+    -followers_count: str
+    -friends_count: str
+    -created_at: str
+    -listed_count: str
+    -verified: str
+}
+
+database MongoDB {
+    Notificaciones
+    News
+    Tweet
+    User
+    UserTweet
+}
+
+database Firebase {
+    Notificaciones
+    News
+    User
+}
+
+Notificaciones "n" -- "1" MongoDB :almacena
+News "n" -- "1" MongoDB :almacena
+Tweet "n" -- "1" MongoDB :almacena
+User "n" -- "1" MongoDB :almacena
+UserTweet "n" -- "1" MongoDB :almacena
+
+Notificaciones "n" -- "1" Firebase :almacena
+News "n" -- "1" Firebase :almacena
+User "n" -- "1" Firebase :almacena
+@enduml

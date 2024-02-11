@@ -1,0 +1,18 @@
+@startuml
+class Clase1{
+
+ 
+      toString()
+    }
+
+    class Clase2 {
+      String[] elementos
+      mostrarElementos()
+    }
+
+    Clase1 <|-- Clase2
+    Clase1 <|-- Clase3
+
+    Clase4 "1" *-- "n" Clase5 :agregación
+    Clase6 o-- Clase7
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+
+
+
+
+database Firebase {
+class Notificaciones {
+    -titulo: str
+    -texto: str
+    -fecha: str
+    -veracidad: str
+    -autor: str
+    -notificado: str
+}
+class News {
+    -id: str
+    -title: str
+    -body: str
+    -type: str
+    -source: str
+    -date: str
+    -link: str
+}
+class User {
+    -id: str
+    -name: str
+    -lastname: str
+    -phone: str
+    -email: str
+}
+
+
+}
+
+@enduml

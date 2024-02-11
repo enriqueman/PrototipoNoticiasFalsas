@@ -1,0 +1,12 @@
+@startuml
+participant "FastAPI" as F
+database "MongoDB" as M
+participant "Modelo Preentrenado\n(OpenAI API)" as O
+
+F -> M : Recupera tweets
+M --> F : Devuelve tweets
+F -> O : Envia tweets para verificación
+note right of O : El modelo es preentrenado\ny se ha afinado (fine-tuned)
+O --> F : Devuelve estado de verificación\n(verdadero o falso) y la probabilidad
+F -> M : Almacena información de verificación
+@enduml
